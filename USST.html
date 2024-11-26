@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortquiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 300px;
+            margin: auto;
+            text-align: center;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wortquiz</h1>
+        <div>
+            <label>Chinesisch:</label>
+            <span id="wordLabel"></span>
+        </div>
+        <div>
+            <label>Wort:</label>
+            <input type="text" id="wordField">
+        </div>
+        <div>
+            <label>Geschlecht:</label>
+            <input type="text" id="genderField">
+        </div>
+        <div>
+            <label>Plural:</label>
+            <input type="text" id="pluralField">
+        </div>
+        <button onclick="submitAnswer()">Einreichen</button>
+        <div id="resultLabel"></div>
+        <div id="scoreLabel">Punktzahl: 0</div>
+        <div id="correctAnswerLabel">Korrekte Antwort:</div>
+    </div>
+
+    <script>
+        let wordMap = {
+            "卡片": ["Karte", "die", "Karten"],
+            "书包": ["Tasche", "die", "Taschen"]
+        };
+        let wrongWords = new Set();
+        let words = Object.keys(wordMap);
+        let currentWord;
+        let score = 0;
+        let round = 1;
+
+        function nextWord() {
+            if (words.length === 0) {
+                if (round > 1 && wrongWords.size === 0) {
+                    document.getElementById('resultLabel').innerText = "Herzlichen Glückwunsch! Alle Wörter sind richtig!";
+                    document.getElementById('correctAnswerLabel').innerText = "";
+                    return;
+                } else if (wrongWords.size > 0) {
+                    words = Array.from(wrongWords);
+                    wrongWords.clear();
+                    round++;
+                } else {
+                    document.getElementById('resultLabel').innerText = "Herzlichen Glückwunsch! Das Spiel ist zu Ende!";
+                    document.getElementById('correctAnswerLabel').innerText = "";
+                    return;
+                }
+            }
+
+            currentWord = words.pop();
+            document.getElementById('wordLabel').innerText = currentWord;
+            document.getElementById('wordField').value = "";
+            document.getElementById('genderField').value = "";
+            document.getElementById('pluralField').value = "";
+            document.getElementById('resultLabel').innerText = "";
+            document.getElementById('correctAnswerLabel').innerText = "Korrekte Antwort:";
+        }
+
+        function submitAnswer() {
+            let correctAnswers = wordMap[currentWord];
+            let enteredWord = document.getElementById('wordField').value.trim();
+            let enteredGender = document.getElementById('genderField').value.trim();
+            let enteredPlural = document.getElementById('pluralField').value.trim();
+
+            let isCorrect = (enteredWord === correctAnswers[0] || enteredWord === correctAnswers[0].replace("die ", ""))
+                            && enteredGender === correctAnswers[1]
+                            && (enteredPlural === correctAnswers[2] || enteredPlural === correctAnswers[2].replace("die ", ""));
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('resultLabel').innerText = "Richtig!";
+                document.getElementById('resultLabel').className = "correct";
+                wrongWords.delete(currentWord);
+                nextWord();
+            } else {
+                document.getElementById('resultLabel').innerText = "Falsch!";
+                document.getElementById('resultLabel').className = "incorrect";
+                document.getElementById('correctAnswerLabel').innerText = "Korrekte Antwort: " + correctAnswers[1] + " " + correctAnswers[0] + ", " + correctAnswers[2];
+                wrongWords.add(currentWord);
+            }
+
+            document.getElementById('scoreLabel').innerText = "Punktzahl: " + score;
+        }
+
+        nextWord();
+    </script>
+</body>
+</html>
